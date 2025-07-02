@@ -1,71 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import AddExpense from './pages/AddExpense';
+import Transactions from './pages/Transactions';
+import Budget from './pages/Budget';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
 
 function App() {
-  const [expenses, setExpenses] = useState([]);
-  const [form, setForm] = useState({ title: '', amount: '', category: '' });
-
-  useEffect(() => {
-    fetchExpenses();
-  }, []);
-
-  const fetchExpenses = async () => {
-    const res = await axios.get('http://localhost:5000/api/expenses');
-    setExpenses(res.data);
-  };
-
-  const addExpense = async () => {
-    const res = await axios.post('http://localhost:5000/api/expenses', form);
-    setExpenses([...expenses, res.data]);
-    setForm({ title: '', amount: '', category: '' });
-  };
-
-  const deleteExpense = async (id) => {
-    await axios.delete(`http://localhost:5000/api/expenses/${id}`);
-    setExpenses(expenses.filter(e => e._id !== id));
-  };
-
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>💸 Budget & Expense Tracker</h1>
-
-      <input
-        value={form.title}
-        onChange={e => setForm({ ...form, title: e.target.value })}
-        placeholder="Title"
-        style={{ margin: '5px', padding: '8px' }}
-      />
-      <input
-        type="number"
-        value={form.amount}
-        onChange={e => setForm({ ...form, amount: e.target.value })}
-        placeholder="Amount"
-        style={{ margin: '5px', padding: '8px' }}
-      />
-      <input
-        value={form.category}
-        onChange={e => setForm({ ...form, category: e.target.value })}
-        placeholder="Category"
-        style={{ margin: '5px', padding: '8px' }}
-      />
-      <button onClick={addExpense} style={{ margin: '5px', padding: '8px' }}>
-        Add
-      </button>
-
-      <ul>
-        {expenses.map(exp => (
-          <li key={exp._id} style={{ margin: '10px 0' }}>
-            <strong>{exp.title}</strong> - ₹{exp.amount} [{exp.category}]
-            <button
-              onClick={() => deleteExpense(exp._id)}
-              style={{ marginLeft: '10px', color: 'red' }}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Router>
+      <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
+        <Link className="navbar-brand" to="/">💸 Budget Tracker</Link>
+        <div className="navbar-nav">
+          <Link className="nav-link" to="/">Dashboard</Link>
+          <Link className="nav-link" to="/add">Add Expense</Link>
+          <Link className="nav-link" to="/transactions">Transactions</Link>
+          <Link className="nav-link" to="/budget">Budget</Link>
+        </div>
+      </nav>
+      <div className="container mt-4">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/add" element={<AddExpense />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/budget" element={<Budget />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
