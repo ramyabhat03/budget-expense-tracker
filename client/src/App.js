@@ -1,32 +1,56 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import AddExpense from './pages/AddExpense';
-import Transactions from './pages/Transactions';
 import Budget from './pages/Budget';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
+import Transactions from './pages/Transactions';
+import AddExpense from './pages/AddExpense';
+import Navbar from './components/Navbar';
+
+// Check if token exists
+const isAuthenticated = () => {
+  return localStorage.getItem('token') !== null;
+};
+
+// Protect routes
+const RequireAuth = ({ children }) => {
+  return isAuthenticated() ? children : <Navigate to="/login" />;
+};
+
+// Wrapper for layout with navbar
+const AppLayout = ({ children }) => {
+  const location = useLocation();
+  const hideNavbarPaths = ['/login'];
+  const hideNavbar = hideNavbarPaths.includes(location.pathname);
+
+  return (
+    <>
+      {!hideNavbar && <Navbar />}
+      <div className="container mt-4">{children}</div>
+    </>
+  );
+};
+
+const AppRoutes = () => (
+  <AppLayout>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+
+      <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+      <Route path="/budget" element={<RequireAuth><Budget /></RequireAuth>} />
+      <Route path="/transactions" element={<RequireAuth><Transactions /></RequireAuth>} />
+      <Route path="/add-expense" element={<RequireAuth><AddExpense /></RequireAuth>} />
+
+      {/* Wildcard fallback */}
+      <Route path="*" element={<h2>404 Page Not Found</h2>} />
+    </Routes>
+  </AppLayout>
+);
 
 function App() {
   return (
     <Router>
-      <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
-        <Link className="navbar-brand" to="/">💸 Budget Tracker</Link>
-        <div className="navbar-nav">
-          <Link className="nav-link" to="/">Dashboard</Link>
-          <Link className="nav-link" to="/add">Add Expense</Link>
-          <Link className="nav-link" to="/transactions">Transactions</Link>
-          <Link className="nav-link" to="/budget">Budget</Link>
-        </div>
-      </nav>
-      <div className="container mt-4">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/add" element={<AddExpense />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/budget" element={<Budget />} />
-        </Routes>
-      </div>
+      <AppRoutes />
     </Router>
   );
 }
